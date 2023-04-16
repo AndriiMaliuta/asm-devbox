@@ -24,10 +24,10 @@
  (global $~lib/rt/tlsf/ROOT (mut i32) (i32.const 0))
  (global $~lib/native/ASC_LOW_MEMORY_LIMIT i32 (i32.const 0))
  (global $~lib/native/ASC_RUNTIME i32 (i32.const 2))
- (global $~lib/rt/__rtti_base i32 (i32.const 528))
- (global $~lib/memory/__data_end i32 (i32.const 552))
- (global $~lib/memory/__stack_pointer (mut i32) (i32.const 33320))
- (global $~lib/memory/__heap_base i32 (i32.const 33320))
+ (global $~lib/rt/__rtti_base i32 (i32.const 592))
+ (global $~lib/memory/__data_end i32 (i32.const 616))
+ (global $~lib/memory/__stack_pointer (mut i32) (i32.const 33384))
+ (global $~lib/memory/__heap_base i32 (i32.const 33384))
  (memory $0 1)
  (data (i32.const 12) ",\00\00\00\00\00\00\00\00\00\00\00\02\00\00\00\1c\00\00\00I\00n\00v\00a\00l\00i\00d\00 \00l\00e\00n\00g\00t\00h\00")
  (data (i32.const 60) "<\00\00\00\00\00\00\00\00\00\00\00\02\00\00\00&\00\00\00~\00l\00i\00b\00/\00a\00r\00r\00a\00y\00b\00u\00f\00f\00e\00r\00.\00t\00s\00\00\00\00\00\00\00")
@@ -39,12 +39,19 @@
  (data (i32.const 380) ",\00\00\00\00\00\00\00\00\00\00\00\02\00\00\00\14\00\00\00~\00l\00i\00b\00/\00r\00t\00.\00t\00s\00\00\00\00\00\00\00\00\00")
  (data (i32.const 432) "\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00")
  (data (i32.const 460) "<\00\00\00\00\00\00\00\00\00\00\00\02\00\00\00\1e\00\00\00~\00l\00i\00b\00/\00r\00t\00/\00t\00l\00s\00f\00.\00t\00s\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00")
- (data (i32.const 528) "\05\00\00\00 \00\00\00 \00\00\00 \00\00\00\00\00\00\00\01\t\00\00")
+ (data (i32.const 524) "<\00\00\00\00\00\00\00\00\00\00\00\02\00\00\00$\00\00\00~\00l\00i\00b\00/\00t\00y\00p\00e\00d\00a\00r\00r\00a\00y\00.\00t\00s\00\00\00\00\00\00\00\00\00")
+ (data (i32.const 592) "\05\00\00\00 \00\00\00 \00\00\00 \00\00\00\00\00\00\00\01\t\00\00")
  (table $0 1 1 funcref)
  (elem $0 (i32.const 1))
  (export "getData" (func $assembly/index/getData))
+ (export "add" (func $assembly/index/add))
  (export "memory" (memory $0))
  (start $~start)
+ (func $start:assembly/index (type $none_=>_none)
+  i32.const 1
+  memory.grow $0
+  drop
+ )
  (func $~lib/rt/itcms/Object#set:nextWithColor (type $i32_i32_=>_none) (param $this i32) (param $nextWithColor i32)
   local.get $this
   local.get $nextWithColor
@@ -2325,10 +2332,18 @@
   local.get $byteLength
   i32.store $0 offset=8
  )
- (func $assembly/index/getData (type $none_=>_i32) (result i32)
-  i32.const 0
-  i32.const 4
-  call $~lib/typedarray/Int32Array#constructor
+ (func $~lib/arraybuffer/ArrayBufferView#get:byteLength (type $i32_=>_i32) (param $this i32) (result i32)
+  local.get $this
+  i32.load $0 offset=8
+ )
+ (func $~lib/arraybuffer/ArrayBufferView#get:dataStart (type $i32_=>_i32) (param $this i32) (result i32)
+  local.get $this
+  i32.load $0 offset=4
+ )
+ (func $assembly/index/add (type $i32_i32_=>_i32) (param $a i32) (param $b i32) (result i32)
+  local.get $a
+  local.get $b
+  i32.add
   return
  )
  (func $~lib/rt/__visit_globals (type $i32_=>_none) (param $0 i32)
@@ -2397,6 +2412,7 @@
   unreachable
  )
  (func $~start (type $none_=>_none)
+  call $start:assembly/index
   memory.size $0
   i32.const 16
   i32.shl
@@ -2420,8 +2436,8 @@
   global.get $~lib/memory/__data_end
   i32.lt_s
   if
-   i32.const 33344
-   i32.const 33392
+   i32.const 33408
+   i32.const 33456
    i32.const 1
    i32.const 1
    call $~lib/builtins/abort
@@ -2578,5 +2594,96 @@
   i32.add
   global.set $~lib/memory/__stack_pointer
   local.get $2
+ )
+ (func $~lib/typedarray/Int32Array#__set (type $i32_i32_i32_=>_none) (param $this i32) (param $index i32) (param $value i32)
+  (local $3 i32)
+  global.get $~lib/memory/__stack_pointer
+  i32.const 4
+  i32.sub
+  global.set $~lib/memory/__stack_pointer
+  call $~stack_check
+  global.get $~lib/memory/__stack_pointer
+  i32.const 0
+  i32.store $0
+  local.get $index
+  local.get $this
+  local.set $3
+  global.get $~lib/memory/__stack_pointer
+  local.get $3
+  i32.store $0
+  local.get $3
+  call $~lib/arraybuffer/ArrayBufferView#get:byteLength
+  i32.const 2
+  i32.shr_u
+  i32.ge_u
+  if
+   i32.const 336
+   i32.const 544
+   i32.const 747
+   i32.const 64
+   call $~lib/builtins/abort
+   unreachable
+  end
+  local.get $this
+  local.set $3
+  global.get $~lib/memory/__stack_pointer
+  local.get $3
+  i32.store $0
+  local.get $3
+  call $~lib/arraybuffer/ArrayBufferView#get:dataStart
+  local.get $index
+  i32.const 2
+  i32.shl
+  i32.add
+  local.get $value
+  i32.store $0
+  global.get $~lib/memory/__stack_pointer
+  i32.const 4
+  i32.add
+  global.set $~lib/memory/__stack_pointer
+ )
+ (func $assembly/index/getData (type $none_=>_i32) (result i32)
+  (local $arr i32)
+  (local $1 i32)
+  global.get $~lib/memory/__stack_pointer
+  i32.const 8
+  i32.sub
+  global.set $~lib/memory/__stack_pointer
+  call $~stack_check
+  global.get $~lib/memory/__stack_pointer
+  i64.const 0
+  i64.store $0
+  global.get $~lib/memory/__stack_pointer
+  i32.const 0
+  i32.const 4
+  call $~lib/typedarray/Int32Array#constructor
+  local.tee $arr
+  i32.store $0
+  local.get $arr
+  local.set $1
+  global.get $~lib/memory/__stack_pointer
+  local.get $1
+  i32.store $0 offset=4
+  local.get $1
+  i32.const 0
+  i32.const 10
+  call $~lib/typedarray/Int32Array#__set
+  local.get $arr
+  local.set $1
+  global.get $~lib/memory/__stack_pointer
+  local.get $1
+  i32.store $0 offset=4
+  local.get $1
+  i32.const 1
+  i32.const 20
+  call $~lib/typedarray/Int32Array#__set
+  local.get $arr
+  local.set $1
+  global.get $~lib/memory/__stack_pointer
+  i32.const 8
+  i32.add
+  global.set $~lib/memory/__stack_pointer
+  local.get $1
+  return
  )
 )

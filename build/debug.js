@@ -46,7 +46,8 @@ async function instantiate(module, imports = {}) {
 }
 export const {
   memory,
-  getData
+  getData,
+  add
 } = await (async url => instantiate(
   await (async () => {
     try { return await globalThis.WebAssembly.compileStreaming(globalThis.fetch(url)); }

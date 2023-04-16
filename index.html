@@ -4,11 +4,43 @@
   <body>
     <div class="root"></div>
 
-    <canvas width="50" height="50" id="canvas"></canvas>
+    <canvas width="600" height="400" id="canvas"></canvas>
     <script type="module">
       // canvas
       const canvasElement = document.querySelector("canvas");
-      const canvasContext = canvasElement.getContext("2d");
+      const ctx = canvasElement.getContext("2d");
+      if (ctx) {
+        const width = 30;
+        const space = 15;
+
+        ctx.fillStyle = "rgb(200, 10, 0)";
+        ctx.fillRect(10, 100, width, -(Math.random() * 100));
+
+        // ctx.clearRect();
+        ctx.fillStyle = "rgb(50, 200, 100)";
+        ctx.fillRect(10 + width + space, 100, width, -(Math.random() * 100));
+
+        ctx.fillStyle = "rgb(100, 50, 255)";
+        ctx.fillRect(50 + width + space, 100, width, -(Math.random() * 100));
+      }
+
+      // data
+
+      const alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+      const encode = function stringToIntegerArray(string, array) {
+        for (let i = 0; i < string.length; i++) {
+          array[i] = alphabet.indexOf(string[i]);
+        }
+      };
+
+      const decode = function integerArrayToString(array) {
+        let string = "";
+        for (let i = 0; i < array.length; i++) {
+          string += alphabet[array[i]];
+        }
+        return string;
+      };
 
       // wasm
 
@@ -20,28 +52,40 @@
         },
       };
 
-      const memory = new WebAssembly.Memory({
-        initial: 10,
-        maximum: 100,
-      });
-      const wasmModule = await WebAssembly.instantiateStreaming(
-        fetch("./build/release.wasm"),
-        {
-          // main: {
-          //   sayHello() {
-          //     console.log("Hello from WebAssembly!");
-          //   },
-          // },
-          env: {
-            abort(_msg, _file, line, column) {
-              console.error("abort called at main.ts:" + line + ":" + column);
+      // const memory = new WebAssembly.Memory({
+      //   initial: 10,
+      //   maximum: 100,
+      // });
+      (async () => {
+        const wasm = await WebAssembly.instantiateStreaming(
+          fetch("./build/release.wasm"),
+          {
+            // main: {
+            //   sayHello() {
+            //     console.log("Hello from WebAssembly!");
+            //   },
+            // },
+            env: {
+              abort(_msg, _file, line, column) {
+                console.error("abort called at main.ts:" + line + ":" + column);
+              },
             },
-          },
-        }
-      ).then((obj) => {
-        let data = obj.instance.exports.getData();
-        console.log(data);
-      });
+          }
+        );
+        let { memory, getData, add } = wasm.instance.exports;
+        const summands = new Uint8Array(memory.buffer);
+        // console.log(summands);
+
+        const plaintext = "helloworld";
+        const myKey = 3;
+
+        const myArray = new Int32Array(memory.buffer, 0, plaintext.length);
+
+        console.log(memory);
+        console.log(myArray); // Int32Array(10) [7, 4, 11, 11, 14, 22, 14, 17, 11, 3]
+        console.log(decode(myArray)); // helloworld
+        console.log(add(10, 20));
+      })();
     </script>
   </body>
 </html>
